@@ -1,29 +1,32 @@
 version: 2.1
 
 orbs:
-  docker: circleci/docker@2.4.0  # Using Docker Orb
+  docker: circleci/docker@2.4.0  # Ensure correct Docker orb version
 
 jobs:
   build-and-push:
     docker:
-      - image: cimg/base:stable  # Base image for the job
+      - image: cimg/node:10.16.3  # Use any base image with Docker installed
     steps:
-      - checkout  # Fetch latest code from repo
+      - checkout  # Pull the latest code
 
-      # Log in to Docker Hub
-      - docker/login:
-          username: $DOCKER_LOGIN
-          password: $DOCKER_PASSWORD
+      # Enable Docker-in-Docker
+      - setup_remote_docker
 
-      # Build Docker Image
-      - docker/build:
-          image: username:/demo_simple
-          tag: latest
+      # Authenticate with Docker Hub
+      - run:
+          name: Log in to Docker Hub
+          command: echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_LOGIN" --password-stdin
 
-      # Push Image to Docker Hub
-      - docker/push:
-          image: username:/demo_simple
-          tag: latest
+      # Build Docker image
+      - run:
+          name: Build Docker Image
+          command: docker build -t "$DOCKER_LOGIN"/simple_demo:latest .
+
+      # Push Docker image to Docker Hub
+      - run:
+          name: Push Docker Image
+          command: docker push "$DOCKER_LOGIN"/simple_demo:latest
 
 workflows:
   build-and-deploy:
