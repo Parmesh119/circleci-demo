@@ -6,7 +6,6 @@ jobs:
     steps:
       - checkout
       - run: node Demo.js
-      - command: echo "Running..."
 
 workflows:
   build:
