@@ -1,13 +1,31 @@
 version: 2.1
+
+orbs:
+  docker: circleci/docker@2.4.0  # Using Docker Orb
+
 jobs:
-  build:
+  build-and-push:
     docker:
-    - image: cimg/node:10.16.3
+      - image: cimg/base:stable  # Base image for the job
     steps:
-      - checkout
-      - run: node Demo.js
+      - checkout  # Fetch latest code from repo
+
+      # Log in to Docker Hub
+      - docker/login:
+          username: $DOCKER_LOGIN
+          password: $DOCKER_PASSWORD
+
+      # Build Docker Image
+      - docker/build:
+          image: username:/demo_simple
+          tag: latest
+
+      # Push Image to Docker Hub
+      - docker/push:
+          image: username:/demo_simple
+          tag: latest
 
 workflows:
-  build:
+  build-and-deploy:
     jobs:
-      - build
+      - build-and-push
